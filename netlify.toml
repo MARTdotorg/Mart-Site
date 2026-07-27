@@ -1,0 +1,22 @@
+[build]
+  publish = "."
+  functions = "netlify/functions"
+  command = "npm install"
+
+# More specific redirect must come before the generic /api/* one.
+[[redirects]]
+  from = "/api/image/*"
+  to = "/.netlify/functions/image?key=:splat"
+  status = 200
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+# Pretty per-project URLs (e.g. /projects/my-film) are served by the single
+# project.html template, which reads the slug from the URL on the client.
+[[redirects]]
+  from = "/projects/*"
+  to = "/project.html"
+  status = 200

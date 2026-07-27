@@ -1,0 +1,286 @@
+<!doctype html>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link
+  href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Bebas+Neue&family=VT323&display=swap"
+  rel="stylesheet"
+/>
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background-color: rgb(0, 20, 60);
+    color: #dbe9ff;
+    font-family: "VT323", "Courier New", monospace;
+    font-size: 22px;
+  }
+
+  header {
+    padding: 24px 6vw 18px;
+    border-bottom: 1px solid rgba(219, 233, 255, 0.3);
+  }
+
+  header a {
+    color: #dbe9ff;
+    text-decoration: none;
+    font-size: 18px;
+    letter-spacing: 1px;
+  }
+
+  header a:hover {
+    text-decoration: underline;
+  }
+
+  header h1 {
+    margin: 10px 0 0 0;
+    font-size: 30px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  header .category {
+    color: rgba(219, 233, 255, 0.6);
+    font-size: 16px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  main {
+    padding: 40px 0 100px;
+  }
+
+  .not-found {
+    text-align: center;
+    padding: 80px 20px;
+    color: rgba(219, 233, 255, 0.6);
+  }
+
+  /* ---------- DESKTOP FREEFORM CANVAS ---------- */
+  .canvas-outer {
+    display: flex;
+    justify-content: center;
+  }
+
+  .canvas-scaler {
+    position: relative;
+    transform-origin: top center;
+  }
+
+  .canvas {
+    position: relative;
+    background: #ffffff;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  }
+
+  .canvas-element {
+    position: absolute;
+    overflow: hidden;
+  }
+
+  .canvas-element img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .canvas-element .text-box {
+    width: 100%;
+    height: 100%;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+
+  /* ---------- MOBILE STACKED FALLBACK ---------- */
+  .stacked-fallback {
+    display: none;
+    max-width: 640px;
+    margin: 0 auto;
+    background: #ffffff;
+    color: #111111;
+    padding: 24px 6vw 40px;
+  }
+
+  .stacked-fallback .stacked-item {
+    margin-bottom: 24px;
+  }
+
+  .stacked-fallback img {
+    width: 100%;
+    display: block;
+  }
+
+  .stacked-fallback .text-box {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+
+  @media (max-width: 768px) {
+    .canvas-outer {
+      display: none;
+    }
+    .stacked-fallback {
+      display: block;
+    }
+  }
+</style>
+
+<html lang="en">
+  <head>
+    <title>MART · Project</title>
+  </head>
+  <body>
+    <header>
+      <a href="/projects.html">&larr; PROJECTS</a>
+      <h1 id="project-title"></h1>
+      <div class="category" id="project-category"></div>
+    </header>
+
+    <main id="main-root"></main>
+
+    <script src="/assets/js/site-data.js"></script>
+    <script>
+      function getSlugFromUrl() {
+        const path = window.location.pathname;
+        const match = path.match(/\/projects\/([^/]+)\/?$/);
+        if (match) return decodeURIComponent(match[1]);
+        const params = new URLSearchParams(window.location.search);
+        return params.get("slug");
+      }
+
+      function renderCanvasView(root, layout) {
+        const outer = document.createElement("div");
+        outer.className = "canvas-outer";
+
+        const scaler = document.createElement("div");
+        scaler.className = "canvas-scaler";
+
+        const canvas = document.createElement("div");
+        canvas.className = "canvas";
+        canvas.style.width = `${layout.width}px`;
+        canvas.style.height = `${layout.height}px`;
+
+        (layout.elements || []).forEach((el) => {
+          canvas.appendChild(buildCanvasElement(el));
+        });
+
+        scaler.appendChild(canvas);
+        outer.appendChild(scaler);
+        root.appendChild(outer);
+
+        function applyScale() {
+          const available = outer.clientWidth - 32;
+          const scale = Math.min(1, available / layout.width);
+          scaler.style.transform = `scale(${scale})`;
+          scaler.style.width = `${layout.width}px`;
+          scaler.style.height = `${layout.height}px`;
+          outer.style.height = `${layout.height * scale + 40}px`;
+        }
+
+        applyScale();
+        window.addEventListener("resize", applyScale);
+      }
+
+      function buildCanvasElement(el) {
+        const node = document.createElement("div");
+        node.className = "canvas-element";
+        node.style.left = `${el.x}px`;
+        node.style.top = `${el.y}px`;
+        node.style.width = `${el.width}px`;
+        node.style.height = `${el.height}px`;
+
+        if (el.type === "image") {
+          const img = document.createElement("img");
+          img.src = el.url;
+          img.alt = "";
+          node.appendChild(img);
+        } else if (el.type === "text") {
+          const textBox = document.createElement("div");
+          textBox.className = "text-box";
+          textBox.style.fontFamily = el.fontFamily;
+          textBox.style.fontSize = `${el.fontSize}px`;
+          textBox.style.color = el.color;
+          textBox.style.fontWeight = el.fontWeight;
+          textBox.style.textAlign = el.textAlign;
+          textBox.textContent = el.text;
+          node.appendChild(textBox);
+        }
+        return node;
+      }
+
+      function renderStackedView(root, layout) {
+        const wrap = document.createElement("div");
+        wrap.className = "stacked-fallback";
+
+        const sorted = [...(layout.elements || [])].sort((a, b) => a.y - b.y);
+        sorted.forEach((el) => {
+          const item = document.createElement("div");
+          item.className = "stacked-item";
+          if (el.type === "image") {
+            const img = document.createElement("img");
+            img.src = el.url;
+            img.alt = "";
+            item.appendChild(img);
+          } else if (el.type === "text") {
+            const textBox = document.createElement("div");
+            textBox.className = "text-box";
+            textBox.style.fontFamily = el.fontFamily;
+            textBox.style.fontSize = `${Math.min(el.fontSize, 28)}px`;
+            textBox.style.color = el.color;
+            textBox.style.fontWeight = el.fontWeight;
+            textBox.style.textAlign = el.textAlign;
+            textBox.textContent = el.text;
+            item.appendChild(textBox);
+          }
+          wrap.appendChild(item);
+        });
+
+        root.appendChild(wrap);
+      }
+
+      (async function renderProject() {
+        const root = document.getElementById("main-root");
+        const slug = getSlugFromUrl();
+
+        try {
+          const projects = await fetchCollection("projects");
+          const project = projects.find((p) => p.slug === slug);
+
+          if (!project) {
+            root.innerHTML =
+              '<p class="not-found">Project not found. <a href="/projects.html">Back to Projects</a></p>';
+            return;
+          }
+
+          document.title = `MART · ${project.title || "Project"}`;
+          document.getElementById("project-title").textContent =
+            project.title || "";
+          document.getElementById("project-category").textContent =
+            project.category || "";
+
+          const layout =
+            project.layout && Array.isArray(project.layout.elements)
+              ? project.layout
+              : { width: 1200, height: 800, elements: [] };
+
+          if (!layout.elements.length) {
+            root.innerHTML =
+              '<p class="not-found">No layout has been designed for this project yet.</p>';
+            return;
+          }
+
+          renderCanvasView(root, layout);
+          renderStackedView(root, layout);
+        } catch (err) {
+          console.error(err);
+          root.innerHTML =
+            '<p class="not-found">Something went wrong loading this project.</p>';
+        }
+      })();
+    </script>
+  </body>
+</html>

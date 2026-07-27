@@ -1,0 +1,137 @@
+<!doctype html>
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background-color: rgb(0, 48, 125);
+    color: black;
+    font-family: "Helvetica Neue", Arial, sans-serif;
+    padding: 8vh 6vw 100px;
+  }
+
+  h1 {
+    text-align: center;
+    color: #ffcf1f;
+    letter-spacing: 6px;
+    font-size: clamp(28px, 4vw, 44px);
+    font-style: italic;
+    font-weight: 800;
+    margin: 0 0 12px 0;
+  }
+
+  .back-link {
+    display: block;
+    text-align: center;
+    margin-bottom: 60px;
+  }
+
+  .back-link a {
+    color: #ffcf1f;
+    text-decoration: none;
+    font-size: 14px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border-bottom: 1px solid transparent;
+  }
+
+  .back-link a:hover {
+    border-bottom-color: #ffcf1f;
+  }
+
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 32px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .gallery-item {
+    background: rgba(0, 0, 0, 0.72);
+    border: 6px solid rgba(0, 0, 0, 0.85);
+    outline: 1px solid rgba(255, 255, 255, 0.06);
+    overflow: hidden;
+  }
+
+  .gallery-item img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+  }
+
+  .gallery-item .caption {
+    padding: 14px 16px 18px;
+  }
+
+  .gallery-item .caption h2 {
+    margin: 0 0 6px 0;
+    color: #ffcf1f;
+    font-size: 16px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .gallery-item .caption p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .empty-state {
+    text-align: center;
+    color: rgba(255, 255, 0, 0.55);
+    font-size: 14px;
+    letter-spacing: 1px;
+    padding: 60px 20px;
+  }
+</style>
+
+<html lang="en">
+  <head>
+    <title>MART · Portfolio</title>
+  </head>
+  <body>
+    <h1>Portfolio</h1>
+    <p class="back-link"><a href="index.html">&larr; Back home</a></p>
+
+    <div id="gallery-root" class="gallery"></div>
+
+    <script src="assets/js/site-data.js"></script>
+    <script>
+      (async function renderPortfolio() {
+        const root = document.getElementById("gallery-root");
+        try {
+          const items = await fetchCollection("portfolio");
+
+          if (!items.length) {
+            root.innerHTML =
+              '<p class="empty-state">No portfolio items yet — add some from the admin portal.</p>';
+            return;
+          }
+
+          root.innerHTML = items
+            .map(
+              (item) => `
+            <div class="gallery-item">
+              ${item.imageUrl ? `<img src="${escapeHtml(item.imageUrl)}" alt="${escapeHtml(item.title || "")}" />` : ""}
+              <div class="caption">
+                ${item.title ? `<h2>${escapeHtml(item.title)}</h2>` : ""}
+                ${item.description ? `<p>${escapeHtml(item.description)}</p>` : ""}
+              </div>
+            </div>
+          `,
+            )
+            .join("");
+        } catch (err) {
+          console.error(err);
+        }
+      })();
+    </script>
+  </body>
+</html>

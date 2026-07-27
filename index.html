@@ -1,0 +1,242 @@
+<!doctype html>
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  :root {
+    --reel-width: min(78vw, 640px);
+  }
+
+  body {
+    margin: 0;
+    background-color: white;
+    color: black;
+    font-family: "Helvetica Neue", Arial, sans-serif;
+  }
+
+  .hero {
+    padding: 12vh 0 0 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* ---------- REEL ASSEMBLY: canister + tab band + filmstrip, all one connected unit ---------- */
+  .reel {
+    position: relative;
+    width: var(--reel-width);
+    margin: 0 auto;
+  }
+
+  /* ---------- FILM CANISTER (real photo/artwork asset) ---------- */
+  .canister-frame {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 2333 / 1378;
+    overflow: hidden;
+    filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.5));
+  }
+
+  .film-roll-image {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    object-position: center bottom;
+  }
+
+  /* ---------- EXPOSURE / LABEL BAND (the "400 · 24 exp." black strip) ---------- */
+  .canister-band {
+    position: relative;
+    width: 100%;
+    background: #0d0d0d;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6);
+  }
+
+  .nav-tabs {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    gap: 52px;
+  }
+
+  .nav-tabs li {
+    margin: 0;
+  }
+
+  .nav-tabs a {
+    display: block;
+    padding: 16px 4px;
+    color: #ffcf1f;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    border-bottom: 2px solid transparent;
+    transition: all 0.25s ease;
+  }
+
+  .nav-tabs a:hover {
+    border-bottom-color: #ffcf1f;
+    text-shadow: 0 0 8px rgba(255, 207, 31, 0.65);
+  }
+
+  /* ---------- FILMSTRIP THAT UNWINDS ---------- */
+  .film-container {
+    position: relative;
+    padding-bottom: 140px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .filmstrip {
+    position: relative;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.72);
+    border-radius: 0 0 10px 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  /* sprocket holes on both edges, repeated */
+  .sprockets {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 34px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 20px 0;
+  }
+
+  .sprockets.left {
+    left: 0;
+  }
+
+  .sprockets.right {
+    right: 0;
+  }
+
+  .sprockets span {
+    display: block;
+    width: 16px;
+    height: 22px;
+    margin: 0 auto;
+    background: rgb(0, 48, 125);
+    border-radius: 3px;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+  }
+
+  .film-frame {
+    position: relative;
+    margin: 40px 44px;
+    aspect-ratio: 3 / 2;
+    background: linear-gradient(135deg, #1c1c1c, #2e2e2e);
+    background-size: cover;
+    background-position: center;
+    border: 6px solid rgba(0, 0, 0, 0.85);
+    outline: 1px solid rgba(255, 255, 255, 0.06);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 0, 0.6);
+    font-size: 16px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .film-frame:first-child {
+    margin-top: 0;
+  }
+
+  .frame-number {
+    position: absolute;
+    bottom: 6px;
+    right: 10px;
+    font-size: 11px;
+    color: rgba(255, 255, 0, 0.5);
+    font-family: monospace;
+  }
+</style>
+
+<html lang="en">
+  <head>
+    <title>MART</title>
+  </head>
+  <body>
+    <div class="hero">
+      <div class="reel">
+        <div class="canister-frame">
+          <img
+            class="film-roll-image"
+            src="Mart%20film%20canister.png"
+            alt="MART 35mm film canister"
+          />
+        </div>
+
+        <div class="canister-band">
+          <ul class="nav-tabs">
+            <li><a href="projects.html">Projects</a></li>
+            <li><a href="#portfolio">Portfolio</a></li>
+          </ul>
+        </div>
+
+        <div class="film-container">
+          <div class="filmstrip">
+            <div class="sprockets left">
+              <span></span><span></span><span></span><span></span><span></span
+              ><span></span><span></span><span></span><span></span><span></span
+              ><span></span><span></span><span></span><span></span><span></span>
+            </div>
+            <div class="sprockets right">
+              <span></span><span></span><span></span><span></span><span></span
+              ><span></span><span></span><span></span><span></span><span></span
+              ><span></span><span></span><span></span><span></span><span></span>
+            </div>
+
+            <div id="frames-root"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="assets/js/site-data.js"></script>
+    <script>
+      (async function renderFrames() {
+        const root = document.getElementById("frames-root");
+        try {
+          const frames = await fetchCollection("frames");
+          const withImages = frames.filter((f) => f.imageUrl);
+
+          if (!withImages.length) {
+            root.innerHTML =
+              '<p style="color: rgba(255,255,0,0.55); text-align:center; padding: 60px 20px; font-size: 14px; letter-spacing: 1px;">No frames yet — add some from the admin portal.</p>';
+            return;
+          }
+
+          root.innerHTML = withImages
+            .map(
+              (frame, i) => `
+            <div class="film-frame" style="background-image: url('${escapeHtml(frame.imageUrl)}')">
+              ${frame.caption ? `<span>${escapeHtml(frame.caption)}</span>` : ""}
+              <span class="frame-number">${String(i + 1).padStart(2, "0")}</span>
+            </div>
+          `,
+            )
+            .join("");
+        } catch (err) {
+          console.error(err);
+        }
+      })();
+    </script>
+  </body>
+</html>
